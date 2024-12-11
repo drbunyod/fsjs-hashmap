@@ -4,24 +4,9 @@ class HashMap {
   constructor() {
     this.capacity = 16;
     this.loadFactor = 0.75;
-    this.buckets = [
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-    ];
+    this.buckets = new Array(this.capacity)
+      .fill(null)
+      .map(() => new LinkedList());
   }
 
   hash(key) {
@@ -38,13 +23,13 @@ class HashMap {
   grow() {
     this.capacity *= 2;
 
-    const newBuckets = [];
-    for (let i = 0; i < this.capacity; i++) {
-      newBuckets.push([]);
-    }
+    const newBuckets = new Array(this.capacity)
+      .fill(null)
+      .map(() => new LinkedList());
 
     const entriesArray = this.entries();
     this.buckets = newBuckets;
+
     for (const entry of entriesArray) {
       this.set(entry[0], entry[1]);
     }
@@ -66,34 +51,19 @@ class HashMap {
     }
 
     const bucket = this.bucket(key);
-
-    if (bucket.length === 0) {
-      const list = new LinkedList();
-      list.append(key, value);
-      bucket.push(list);
+    const keyIndex = bucket.find(key);
+    if (keyIndex !== null) {
+      bucket.at(keyIndex).value = value;
     } else {
-      const list = bucket[0];
-      const keyIndex = list.find(key);
-
-      if (keyIndex !== null) {
-        list.at(keyIndex).value = value;
-      } else {
-        list.append(key, value);
-      }
+      bucket.append(key, value);
     }
   }
 
   get(key) {
     const bucket = this.bucket(key);
-    if (bucket.length === 0) {
-      return null;
-    }
-
-    const list = bucket[0];
-    const keyIndex = list.find(key);
-
+    const keyIndex = bucket.find(key);
     if (keyIndex !== null) {
-      return list.at(keyIndex).value;
+      return bucket.at(keyIndex).value;
     }
 
     return null;
@@ -101,24 +71,14 @@ class HashMap {
 
   has(key) {
     const bucket = this.bucket(key);
-    if (bucket.length === 0) {
-      return false;
-    }
-
-    return bucket[0].contains(key);
+    return bucket.contains(key);
   }
 
   remove(key) {
     const bucket = this.bucket(key);
-    if (bucket.length === 0) {
-      return false;
-    }
-
-    const list = bucket[0];
-    const keyIndex = list.find(key);
-
+    const keyIndex = bucket.find(key);
     if (keyIndex !== null) {
-      list.removeAt(keyIndex);
+      bucket.removeAt(keyIndex);
       return true;
     }
 
@@ -129,9 +89,7 @@ class HashMap {
     let count = 0;
 
     for (const bucket of this.buckets) {
-      if (bucket.length > 0) {
-        count += bucket[0].size();
-      }
+      count += bucket.size();
     }
 
     return count;
@@ -139,7 +97,7 @@ class HashMap {
 
   clear() {
     for (const bucket of this.buckets) {
-      bucket.length = 0;
+      bucket.clear();
     }
   }
 
@@ -147,9 +105,7 @@ class HashMap {
     let keysArray = [];
 
     for (const bucket of this.buckets) {
-      if (bucket.length > 0) {
-        keysArray.push(...bucket[0].keys());
-      }
+      keysArray.push(...bucket.keys());
     }
 
     return keysArray;
@@ -159,9 +115,7 @@ class HashMap {
     let valuesArray = [];
 
     for (const bucket of this.buckets) {
-      if (bucket.length > 0) {
-        valuesArray.push(...bucket[0].values());
-      }
+      valuesArray.push(...bucket.values());
     }
 
     return valuesArray;
@@ -171,9 +125,7 @@ class HashMap {
     let entriesArray = [];
 
     for (const bucket of this.buckets) {
-      if (bucket.length > 0) {
-        entriesArray.push(...bucket[0].entries());
-      }
+      entriesArray.push(...bucket.entries());
     }
 
     return entriesArray;
