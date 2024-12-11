@@ -21,14 +21,12 @@ class HashMap {
   }
 
   grow() {
-    this.capacity *= 2;
+    const entriesArray = this.entries();
 
-    const newBuckets = new Array(this.capacity)
+    this.capacity *= 2;
+    this.buckets = new Array(this.capacity)
       .fill(null)
       .map(() => new LinkedList());
-
-    const entriesArray = this.entries();
-    this.buckets = newBuckets;
 
     for (const entry of entriesArray) {
       this.set(entry[0], entry[1]);
