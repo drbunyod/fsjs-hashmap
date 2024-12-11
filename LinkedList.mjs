@@ -156,6 +156,11 @@ class LinkedList {
     }
   }
 
+  clear() {
+    this.head = null;
+    this.tail = null;
+  }
+
   keys() {
     let keysArray = [];
     let tmp = this.head;
